@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  nameKey     String   @unique
+  website     String?
+  industry    String?
+  stage       String?
+  description String?  @db.Text
+  aiSummary   String?  @db.Text
+  intentScore Int      @default(0)
+  scoreReason String?  @db.Text
+  status      String   @default("new")
+  rawData     Json?
+  signals     Signal[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([intentScore(sort: Desc)])
+  @@index([industry])
+  @@index([stage])
+  @@index([status])
+  @@map("companies")
+}
+
+model Signal {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type        String
+  description String   @db.Text
+  source      String?
+  detectedAt  DateTime @default(now())
+
+  @@index([companyId])
+  @@index([type])
+  @@map("signals")
+}
+
+model DiscoveryRun {
+  id             String    @id @default(cuid())
+  industry       String?
+  keywords       String?
+  signalTypes    String[]
+  status         String    @default("running")
+  companiesFound Int       @default(0)
+  error          String?   @db.Text
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+
+  @@map("discovery_runs")
+}
