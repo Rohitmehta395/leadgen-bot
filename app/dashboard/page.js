@@ -6,11 +6,14 @@ import { Plus } from 'lucide-react'
 import Topbar from '@/components/layout/Topbar'
 import CompaniesTable from '@/components/dashboard/CompaniesTable'
 import DiscoverDialog from '@/components/discovery/DiscoverDialog'
+import CompanySheet from '@/components/company/CompanySheet'
 import { Button } from '@/components/ui/button'
 import { useCompanies } from '@/hooks/useCompanies'
 
 export default function DashboardPage() {
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogOpen, setDialogOpen]       = useState(false)
+  const [selectedCompany, setSelectedCompany] = useState(null)
+  const [sheetOpen, setSheetOpen]         = useState(false)
 
   const {
     companies,
@@ -19,10 +22,8 @@ export default function DashboardPage() {
     error,
     fetchCompanies,
     deleteCompany,
-    setCompanies,
   } = useCompanies()
 
-  // Fetch companies on mount
   useEffect(() => {
     fetchCompanies()
   }, [fetchCompanies])
@@ -33,13 +34,17 @@ export default function DashboardPage() {
         result.companiesFound === 1 ? 'company' : 'companies'
       }`
     )
-    // Refresh the table to include newly discovered companies
     fetchCompanies()
   }
 
   const handleDelete = async (id) => {
     try {
       await deleteCompany(id)
+      // Close sheet if the deleted company is open
+      if (selectedCompany?.id === id) {
+        setSheetOpen(false)
+        setSelectedCompany(null)
+      }
       toast.success('Company removed')
     } catch {
       toast.error('Failed to remove company')
@@ -47,8 +52,23 @@ export default function DashboardPage() {
   }
 
   const handleRowClick = (company) => {
-    // Company detail sheet will be wired in Stage 9
-    toast.info(`${company.name} — detail panel coming in Stage 9`)
+    setSelectedCompany(company)
+    setSheetOpen(true)
+  }
+
+  const handleEnriched = (updatedCompany) => {
+    // Update selected company so sheet reflects new data immediately
+    setSelectedCompany(updatedCompany)
+    // Refresh table so score + status updates in list
+    fetchCompanies()
+  }
+
+  const handleSheetOpenChange = (val) => {
+    setSheetOpen(val)
+    if (!val) {
+      // Small delay to avoid flash of missing content during close animation
+      setTimeout(() => setSelectedCompany(null), 300)
+    }
   }
 
   return (
@@ -99,6 +119,13 @@ export default function DashboardPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSuccess={handleDiscoverySuccess}
+      />
+
+      <CompanySheet
+        company={selectedCompany}
+        open={sheetOpen}
+        onOpenChange={handleSheetOpenChange}
+        onEnriched={handleEnriched}
       />
     </div>
   )
