@@ -1,41 +1,59 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Loader2, Zap } from 'lucide-react'
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Loader2, Zap } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const SIGNAL_OPTIONS = [
-  { value: 'hiring',    label: 'Hiring Sales Roles',    description: 'SDR, BDR, VP Sales' },
-  { value: 'funding',   label: 'Recent Funding',         description: 'Any funding round' },
-  { value: 'growth',    label: 'Growth Signals',         description: 'New customers, revenue milestones' },
-  { value: 'expansion', label: 'Expansion',              description: 'New markets, new offices' },
-  { value: 'keyword',   label: 'Keyword Match',          description: 'Mentions sales/outbound needs' },
-]
+  {
+    value: "hiring",
+    label: "Hiring Sales Roles",
+    description: "SDR, BDR, VP Sales",
+  },
+  {
+    value: "funding",
+    label: "Recent Funding",
+    description: "Any funding round",
+  },
+  {
+    value: "growth",
+    label: "Growth Signals",
+    description: "New customers, revenue milestones",
+  },
+  {
+    value: "expansion",
+    label: "Expansion",
+    description: "New markets, new offices",
+  },
+  {
+    value: "keyword",
+    label: "Keyword Match",
+    description: "Mentions sales/outbound needs",
+  },
+];
 
 const schema = z.object({
-  industry: z.string().min(2, 'Industry is required').max(100),
+  industry: z.string().min(2, "Industry is required").max(100),
   keywords: z.string().max(200).optional(),
   location: z.string().max(100).optional(),
-  signalTypes: z
-    .array(z.string())
-    .min(1, 'Select at least one signal type'),
-})
+  signalTypes: z.array(z.string()).min(1, "Select at least one signal type"),
+});
 
 export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
-  const [isRunning, setIsRunning] = useState(false)
-  const [runError, setRunError]   = useState(null)
+  const [isRunning, setIsRunning] = useState(false);
+  const [runError, setRunError] = useState(null);
 
   const {
     register,
@@ -47,60 +65,60 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      industry: '',
-      keywords: '',
-      location: '',
-      signalTypes: ['hiring', 'funding'],
+      industry: "",
+      keywords: "",
+      location: "",
+      signalTypes: ["hiring", "funding"],
     },
-  })
+  });
 
-  const selectedSignals = watch('signalTypes') ?? []
+  const selectedSignals = watch("signalTypes") ?? [];
 
   const toggleSignal = (value) => {
-    const current = selectedSignals
+    const current = selectedSignals;
     const updated = current.includes(value)
       ? current.filter((v) => v !== value)
-      : [...current, value]
-    setValue('signalTypes', updated, { shouldValidate: true })
-  }
+      : [...current, value];
+    setValue("signalTypes", updated, { shouldValidate: true });
+  };
 
   const onSubmit = async (data) => {
-    setIsRunning(true)
-    setRunError(null)
+    setIsRunning(true);
+    setRunError(null);
 
     try {
-      const res = await fetch('/api/discover', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/discover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           industry: data.industry,
           keywords: data.keywords || undefined,
           location: data.location || undefined,
           signalTypes: data.signalTypes,
         }),
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error ?? 'Discovery failed')
+        throw new Error(result.error ?? "Discovery failed");
       }
 
-      reset()
-      onOpenChange(false)
-      onSuccess(result)
+      reset();
+      onOpenChange(false);
+      onSuccess(result);
     } catch (err) {
-      setRunError(err.message)
+      setRunError(err.message);
     } finally {
-      setIsRunning(false)
+      setIsRunning(false);
     }
-  }
+  };
 
   const handleOpenChange = (val) => {
-    if (isRunning) return  // Prevent closing while running
-    setRunError(null)
-    onOpenChange(val)
-  }
+    if (isRunning) return; // Prevent closing while running
+    setRunError(null);
+    onOpenChange(val);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -111,7 +129,8 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
             Run Discovery
           </DialogTitle>
           <DialogDescription>
-            Find companies that match your ideal customer profile using AI-powered signal detection.
+            Find companies that match your ideal customer profile using
+            AI-powered signal detection.
           </DialogDescription>
         </DialogHeader>
 
@@ -124,10 +143,12 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
             <Input
               id="industry"
               placeholder="e.g. B2B SaaS, Dental Clinics, E-commerce"
-              {...register('industry')}
+              {...register("industry")}
             />
             {errors.industry && (
-              <p className="text-xs text-destructive">{errors.industry.message}</p>
+              <p className="text-xs text-destructive">
+                {errors.industry.message}
+              </p>
             )}
           </div>
 
@@ -138,7 +159,7 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
             </Label>
             <div className="grid grid-cols-1 gap-2">
               {SIGNAL_OPTIONS.map((option) => {
-                const isSelected = selectedSignals.includes(option.value)
+                const isSelected = selectedSignals.includes(option.value);
                 return (
                   <button
                     key={option.value}
@@ -146,15 +167,15 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
                     onClick={() => toggleSignal(option.value)}
                     className={`flex items-start gap-3 rounded-md border px-3 py-2.5 text-left text-sm transition-colors ${
                       isSelected
-                        ? 'border-primary bg-primary/5 text-foreground'
-                        : 'border-border bg-background text-muted-foreground hover:border-muted-foreground'
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border bg-background text-muted-foreground hover:border-muted-foreground"
                     }`}
                   >
                     <div
                       className={`mt-0.5 h-4 w-4 shrink-0 rounded border flex items-center justify-center ${
                         isSelected
-                          ? 'border-primary bg-primary'
-                          : 'border-muted-foreground'
+                          ? "border-primary bg-primary"
+                          : "border-muted-foreground"
                       }`}
                     >
                       {isSelected && (
@@ -182,7 +203,7 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
                       </div>
                     </div>
                   </button>
-                )
+                );
               })}
             </div>
             {errors.signalTypes && (
@@ -195,26 +216,30 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
           {/* Keywords (optional) */}
           <div className="space-y-1.5">
             <Label htmlFor="keywords">
-              Keywords{' '}
-              <span className="text-muted-foreground font-normal">(optional)</span>
+              Keywords{" "}
+              <span className="text-muted-foreground font-normal">
+                (optional)
+              </span>
             </Label>
             <Input
               id="keywords"
               placeholder="e.g. outbound sales, pipeline growth"
-              {...register('keywords')}
+              {...register("keywords")}
             />
           </div>
 
           {/* Location (optional) */}
           <div className="space-y-1.5">
             <Label htmlFor="location">
-              Location{' '}
-              <span className="text-muted-foreground font-normal">(optional)</span>
+              Location{" "}
+              <span className="text-muted-foreground font-normal">
+                (optional)
+              </span>
             </Label>
             <Input
               id="location"
               placeholder="e.g. United States, Europe"
-              {...register('location')}
+              {...register("location")}
             />
           </div>
 
@@ -229,7 +254,8 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
           {isRunning && (
             <div className="rounded-md bg-muted px-3 py-2">
               <p className="text-xs text-muted-foreground">
-                Searching the web and analyzing signals with AI. This takes 20–40 seconds...
+                Searching the web and analyzing signals with AI. This takes
+                20–40 seconds...
               </p>
             </div>
           )}
@@ -262,5 +288,5 @@ export default function DiscoverDialog({ open, onOpenChange, onSuccess }) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
