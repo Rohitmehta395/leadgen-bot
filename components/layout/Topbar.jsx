@@ -9,11 +9,9 @@ export default function Topbar({ title, children }) {
       <div className="flex items-center gap-3">
         <div className="md:hidden">
           <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="-ml-2 h-9 w-9">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle mobile menu</span>
-              </Button>
+            <SheetTrigger render={<Button variant="ghost" size="icon" className="-ml-2 h-9 w-9" />}>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle mobile menu</span>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
                <div className="flex h-14 items-center gap-2 border-b border-border px-4">
