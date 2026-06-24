@@ -1,12 +1,12 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
-} from "@tanstack/react-table";
+} from '@tanstack/react-table'
 import {
   Table,
   TableBody,
@@ -14,9 +14,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getColumns } from "./columns";
+} from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { getColumns } from './columns'
 
 function TableSkeleton() {
   return (
@@ -25,7 +25,7 @@ function TableSkeleton() {
         <Skeleton key={i} className="h-12 w-full rounded-md" />
       ))}
     </div>
-  );
+  )
 }
 
 function EmptyState() {
@@ -51,7 +51,7 @@ function EmptyState() {
         Run a discovery to surface high-intent leads
       </p>
     </div>
-  );
+  )
 }
 
 export default function CompaniesTable({
@@ -60,9 +60,11 @@ export default function CompaniesTable({
   onDelete,
   onRowClick,
 }) {
-  const [sorting, setSorting] = useState([{ id: "intentScore", desc: true }]);
+  const [sorting, setSorting] = useState([
+    { id: 'intentScore', desc: true },
+  ])
 
-  const columns = getColumns({ onDelete, onRowClick });
+  const columns = getColumns({ onDelete, onRowClick })
 
   const table = useReactTable({
     data,
@@ -71,11 +73,11 @@ export default function CompaniesTable({
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  });
+  })
 
-  if (isLoading) return <TableSkeleton />;
+  if (isLoading) return <TableSkeleton />
 
-  if (data.length === 0) return <EmptyState />;
+  if (data.length === 0) return <EmptyState />
 
   return (
     <div className="rounded-lg border border-border overflow-hidden">
@@ -92,7 +94,7 @@ export default function CompaniesTable({
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext(),
+                        header.getContext()
                       )}
                 </TableHead>
               ))}
@@ -116,5 +118,5 @@ export default function CompaniesTable({
         </TableBody>
       </Table>
     </div>
-  );
+  )
 }

@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { formatDistanceToNow } from 'date-fns'
 import {
   ExternalLink,
   Sparkles,
@@ -11,37 +11,37 @@ import {
   TrendingUp,
   Calendar,
   Info,
-} from "lucide-react";
+} from 'lucide-react'
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import IntentBadge from "@/components/dashboard/IntentBadge";
-import SignalTags from "@/components/dashboard/SignalTags";
+} from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import IntentBadge from '@/components/dashboard/IntentBadge'
+import SignalTags from '@/components/dashboard/SignalTags'
 
 const SIGNAL_STYLES = {
-  hiring: "bg-blue-100 text-blue-700 border-blue-200",
-  funding: "bg-violet-100 text-violet-700 border-violet-200",
-  growth: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  expansion: "bg-orange-100 text-orange-700 border-orange-200",
-  keyword: "bg-gray-100 text-gray-600 border-gray-200",
-};
+  hiring:    'bg-blue-100 text-blue-700 border-blue-200',
+  funding:   'bg-violet-100 text-violet-700 border-violet-200',
+  growth:    'bg-emerald-100 text-emerald-700 border-emerald-200',
+  expansion: 'bg-orange-100 text-orange-700 border-orange-200',
+  keyword:   'bg-gray-100 text-gray-600 border-gray-200',
+}
 
 const SIGNAL_LABELS = {
-  hiring: "Hiring",
-  funding: "Funding",
-  growth: "Growth",
-  expansion: "Expansion",
-  keyword: "Keyword",
-};
+  hiring:    'Hiring',
+  funding:   'Funding',
+  growth:    'Growth',
+  expansion: 'Expansion',
+  keyword:   'Keyword',
+}
 
 function MetaRow({ icon: Icon, label, value }) {
-  if (!value) return null;
+  if (!value) return null
   return (
     <div className="flex items-start gap-3">
       <div className="flex items-center gap-1.5 w-24 shrink-0">
@@ -50,7 +50,7 @@ function MetaRow({ icon: Icon, label, value }) {
       </div>
       <span className="text-sm text-foreground">{value}</span>
     </div>
-  );
+  )
 }
 
 function SectionTitle({ children }) {
@@ -58,71 +58,66 @@ function SectionTitle({ children }) {
     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
       {children}
     </p>
-  );
+  )
 }
 
-export default function CompanySheet({
-  company,
-  open,
-  onOpenChange,
-  onEnriched,
-}) {
-  const [isEnriching, setIsEnriching] = useState(false);
+export default function CompanySheet({ company, open, onOpenChange, onEnriched }) {
+  const [isEnriching, setIsEnriching] = useState(false)
 
-  if (!company) return null;
+  if (!company) return null
 
   const handleEnrich = async () => {
     if (!company.website) {
-      toast.error("No website available to enrich from");
-      return;
+      toast.error('No website available to enrich from')
+      return
     }
 
-    setIsEnriching(true);
+    setIsEnriching(true)
     try {
       const res = await fetch(`/api/companies/${company.id}/enrich`, {
-        method: "POST",
-      });
+        method: 'POST',
+      })
 
-      const data = await res.json();
+      const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error ?? "Enrichment failed");
+        throw new Error(data.error ?? 'Enrichment failed')
       }
 
-      toast.success("Company enriched successfully");
-      onEnriched(data.company);
+      toast.success('Company enriched successfully')
+      onEnriched(data.company)
     } catch (err) {
-      toast.error(err.message ?? "Enrichment failed");
+      toast.error(err.message ?? 'Enrichment failed')
     } finally {
-      setIsEnriching(false);
+      setIsEnriching(false)
     }
-  };
+  }
 
   const stagePill = company.stage ? (
     <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-medium capitalize">
       {company.stage}
     </span>
-  ) : null;
+  ) : null
 
   const statusPill = (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border ${
-        company.status === "enriched"
-          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-          : company.status === "contacted"
-            ? "bg-blue-50 text-blue-700 border-blue-200"
-            : "bg-muted text-muted-foreground border-border"
+        company.status === 'enriched'
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+          : company.status === 'contacted'
+          ? 'bg-blue-50 text-blue-700 border-blue-200'
+          : 'bg-muted text-muted-foreground border-border'
       }`}
     >
-      {company.status ?? "new"}
+      {company.status ?? 'new'}
     </span>
-  );
+  )
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         {/* Header */}
-        <SheetHeader className="pr-6">
+        <SheetHeader className="pr-12">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <SheetTitle className="text-base font-semibold leading-tight">
@@ -136,7 +131,7 @@ export default function CompanySheet({
                   className="mt-1 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit"
                 >
                   <ExternalLink className="h-3 w-3" />
-                  {company.website.replace(/^https?:\/\//, "")}
+                  {company.website.replace(/^https?:\/\//, '')}
                 </a>
               )}
             </div>
@@ -148,21 +143,16 @@ export default function CompanySheet({
         </SheetHeader>
 
         <div className="mt-5 space-y-6">
+
           {/* Meta */}
           <div className="space-y-2.5">
-            <MetaRow
-              icon={Building2}
-              label="Industry"
-              value={company.industry}
-            />
-            <MetaRow icon={TrendingUp} label="Stage" value={stagePill} />
-            <MetaRow icon={Info} label="Status" value={statusPill} />
+            <MetaRow icon={Building2} label="Industry"  value={company.industry} />
+            <MetaRow icon={TrendingUp} label="Stage"    value={stagePill} />
+            <MetaRow icon={Info}       label="Status"   value={statusPill} />
             <MetaRow
               icon={Calendar}
               label="Added"
-              value={formatDistanceToNow(new Date(company.createdAt), {
-                addSuffix: true,
-              })}
+              value={formatDistanceToNow(new Date(company.createdAt), { addSuffix: true })}
             />
           </div>
 
@@ -264,8 +254,8 @@ export default function CompanySheet({
             <SectionTitle>Enrichment</SectionTitle>
             <p className="text-xs text-muted-foreground">
               {company.website
-                ? "Scrape the company website to update signals, description, and re-score intent."
-                : "No website available. Add a website URL to enable enrichment."}
+                ? 'Scrape the company website to update signals, description, and re-score intent.'
+                : 'No website available. Add a website URL to enable enrichment.'}
             </p>
             <Button
               size="sm"
@@ -282,9 +272,7 @@ export default function CompanySheet({
               ) : (
                 <>
                   <Sparkles className="h-3.5 w-3.5" />
-                  {company.status === "enriched"
-                    ? "Re-Enrich"
-                    : "Enrich Company"}
+                  {company.status === 'enriched' ? 'Re-Enrich' : 'Enrich Company'}
                 </>
               )}
             </Button>
@@ -294,8 +282,9 @@ export default function CompanySheet({
               </p>
             )}
           </div>
+
         </div>
       </SheetContent>
     </Sheet>
-  );
+  )
 }
