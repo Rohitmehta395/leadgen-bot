@@ -7,14 +7,13 @@ import Topbar from '@/components/layout/Topbar'
 import CompaniesTable from '@/components/dashboard/CompaniesTable'
 import FilterBar from '@/components/dashboard/FilterBar'
 import DiscoverDialog from '@/components/discovery/DiscoverDialog'
-import CompanySheet from '@/components/company/CompanySheet'
 import { Button } from '@/components/ui/button'
 import { useCompanies } from '@/hooks/useCompanies'
+import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
-  const [dialogOpen, setDialogOpen]           = useState(false)
-  const [selectedCompany, setSelectedCompany] = useState(null)
-  const [sheetOpen, setSheetOpen]             = useState(false)
+  const router = useRouter()
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const {
     companies,
@@ -38,10 +37,6 @@ export default function DashboardPage() {
   const handleDelete = async (id) => {
     try {
       await deleteCompany(id)
-      if (selectedCompany?.id === id) {
-        setSheetOpen(false)
-        setSelectedCompany(null)
-      }
       toast.success('Company removed')
     } catch {
       toast.error('Failed to remove company')
@@ -49,20 +44,7 @@ export default function DashboardPage() {
   }
 
   const handleRowClick = (company) => {
-    setSelectedCompany(company)
-    setSheetOpen(true)
-  }
-
-  const handleEnriched = (updatedCompany) => {
-    setSelectedCompany(updatedCompany)
-    fetchCompanies()
-  }
-
-  const handleSheetOpenChange = (val) => {
-    setSheetOpen(val)
-    if (!val) {
-      setTimeout(() => setSelectedCompany(null), 300)
-    }
+    router.push(`/companies/${company.id}`)
   }
 
   return (
@@ -115,13 +97,6 @@ export default function DashboardPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSuccess={handleDiscoverySuccess}
-      />
-
-      <CompanySheet
-        company={selectedCompany}
-        open={sheetOpen}
-        onOpenChange={handleSheetOpenChange}
-        onEnriched={handleEnriched}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import { getGeminiModel } from '@/lib/gemini'
+import { generateContentWithFallback } from '@/lib/gemini'
 import { ExtractionResultSchema, type ExtractionResult } from './schemas'
 
 const MAX_CONTENT_LENGTH = 12000
@@ -6,6 +6,7 @@ const MAX_CONTENT_LENGTH = 12000
 const SYSTEM_PROMPT = `You are a B2B sales intelligence analyst. Your job is to extract companies from web content and identify signals that indicate they might need sales outreach or appointment-setting services.
 
 Signal types to look for:
+- industry: Company operates in the specified target industry
 - hiring: Company is actively hiring for sales roles (SDR, BDR, AE, VP Sales, Sales Manager)
 - funding: Company recently raised funding (any round)
 - growth: Company is growing — new markets, partnerships, revenue milestones, customer wins
@@ -30,7 +31,7 @@ You must respond with valid JSON matching this exact structure:
       "stage": "seed | series-a | series-b | growth | enterprise | unknown",
       "signals": [
         {
-          "type": "hiring | funding | growth | expansion | keyword",
+          "type": "industry | hiring | funding | growth | expansion | keyword",
           "description": "string",
           "source": "string or null"
         }
@@ -65,12 +66,16 @@ ${truncated}
 
 Extract all companies mentioned that show intent signals relevant to needing sales outreach or appointment-setting support. Return JSON only.`
 
-  const model = getGeminiModel()
-  const result = await model.generateContent(prompt)
+  const result = await generateContentWithFallback(prompt)
   const text = result.response.text()
 
+  let cleanText = text.trim()
+  if (cleanText.startsWith('```')) {
+    cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '')
+  }
+
   try {
-    const parsed = JSON.parse(text)
+    const parsed = JSON.parse(cleanText)
     return ExtractionResultSchema.parse(parsed)
   } catch (error) {
     console.error('Gemini extraction parse error:', text)

@@ -3,6 +3,7 @@ import { z } from 'zod'
 // --- Signal & Company Extraction ---
 
 export const SignalTypeSchema = z.enum([
+  'industry',
   'hiring',
   'funding',
   'growth',
@@ -10,14 +11,7 @@ export const SignalTypeSchema = z.enum([
   'keyword',
 ])
 
-export const StageSchema = z.enum([
-  'seed',
-  'series-a',
-  'series-b',
-  'growth',
-  'enterprise',
-  'unknown',
-])
+export const StageSchema = z.string().nullable().default('unknown')
 
 export const ExtractedSignalSchema = z.object({
   type: SignalTypeSchema,

@@ -2,14 +2,44 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
 
-// Allow overriding via env — useful when a model hits its free-tier quota
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash'
+// Ordered list of models to try. We prioritize fast models with highest quotas.
+const FALLBACK_MODELS = [
+  process.env.GEMINI_MODEL ?? 'gemini-2.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-2.5-flash',
+  'gemini-3.5-flash',
+  'gemini-3-flash',
+]
 
-export function getGeminiModel() {
-  return genAI.getGenerativeModel({
-    model: GEMINI_MODEL,
-    generationConfig: {
-      responseMimeType: 'application/json',
-    },
-  })
+export async function generateContentWithFallback(prompt: string) {
+  let lastError: any
+
+  for (const modelName of FALLBACK_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: {
+          responseMimeType: 'application/json',
+        },
+      })
+
+      const result = await model.generateContent(prompt)
+      return result
+    } catch (error: any) {
+      lastError = error
+      const errorMessage = error?.message || String(error)
+
+      // If it's a rate limit or quota error, log it and try the next model
+      if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
+        console.warn(`[Gemini] Model ${modelName} hit rate limit or quota, falling back to next model...`)
+        continue
+      }
+
+      // If it's a different error (e.g. invalid prompt), throw immediately
+      throw error
+    }
+  }
+
+  // If we exhausted all models, throw the last error
+  throw lastError
 }

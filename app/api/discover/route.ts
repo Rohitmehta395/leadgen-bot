@@ -6,7 +6,7 @@ const DiscoverInputSchema = z.object({
   industry: z.string().min(2).max(100),
   keywords: z.string().max(200).optional(),
   signalTypes: z
-    .array(z.enum(['hiring', 'funding', 'growth', 'expansion', 'keyword']))
+    .array(z.enum(['industry', 'hiring', 'funding', 'growth', 'expansion', 'keyword']))
     .min(1),
   location: z.string().max(100).optional(),
 })

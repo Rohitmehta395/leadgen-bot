@@ -1,4 +1,4 @@
-import { getGeminiModel } from '@/lib/gemini'
+import { generateContentWithFallback } from '@/lib/gemini'
 import { IntentScoreSchema, type IntentScore, type ExtractedSignal } from './schemas'
 
 const SYSTEM_PROMPT = `You are a sales intelligence scoring engine. Score companies from 0 to 100 on how likely they are to need and purchase outbound sales services or appointment-setting support.
@@ -52,12 +52,16 @@ ${signalList || '- No signals detected'}
 
 Score this company's intent to purchase outbound sales or appointment-setting services. Return JSON only.`
 
-  const model = getGeminiModel()
-  const result = await model.generateContent(prompt)
+  const result = await generateContentWithFallback(prompt)
   const text = result.response.text()
 
+  let cleanText = text.trim()
+  if (cleanText.startsWith('```')) {
+    cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '')
+  }
+
   try {
-    const parsed = JSON.parse(text)
+    const parsed = JSON.parse(cleanText)
     return IntentScoreSchema.parse(parsed)
   } catch (error) {
     console.error('Gemini scoring parse error:', text)
