@@ -1,19 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Plus } from 'lucide-react'
 import Topbar from '@/components/layout/Topbar'
 import CompaniesTable from '@/components/dashboard/CompaniesTable'
+import FilterBar from '@/components/dashboard/FilterBar'
 import DiscoverDialog from '@/components/discovery/DiscoverDialog'
 import CompanySheet from '@/components/company/CompanySheet'
 import { Button } from '@/components/ui/button'
 import { useCompanies } from '@/hooks/useCompanies'
 
 export default function DashboardPage() {
-  const [dialogOpen, setDialogOpen]       = useState(false)
+  const [dialogOpen, setDialogOpen]           = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(null)
-  const [sheetOpen, setSheetOpen]         = useState(false)
+  const [sheetOpen, setSheetOpen]             = useState(false)
 
   const {
     companies,
@@ -22,11 +23,8 @@ export default function DashboardPage() {
     error,
     fetchCompanies,
     deleteCompany,
+    applyFilters,
   } = useCompanies()
-
-  useEffect(() => {
-    fetchCompanies()
-  }, [fetchCompanies])
 
   const handleDiscoverySuccess = (result) => {
     toast.success(
@@ -40,7 +38,6 @@ export default function DashboardPage() {
   const handleDelete = async (id) => {
     try {
       await deleteCompany(id)
-      // Close sheet if the deleted company is open
       if (selectedCompany?.id === id) {
         setSheetOpen(false)
         setSelectedCompany(null)
@@ -57,16 +54,13 @@ export default function DashboardPage() {
   }
 
   const handleEnriched = (updatedCompany) => {
-    // Update selected company so sheet reflects new data immediately
     setSelectedCompany(updatedCompany)
-    // Refresh table so score + status updates in list
     fetchCompanies()
   }
 
   const handleSheetOpenChange = (val) => {
     setSheetOpen(val)
     if (!val) {
-      // Small delay to avoid flash of missing content during close animation
       setTimeout(() => setSelectedCompany(null), 300)
     }
   }
@@ -74,7 +68,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <Topbar title="Companies">
-        {total > 0 && (
+        {!isLoading && total > 0 && (
           <span className="text-xs text-muted-foreground mr-2">
             {total} {total === 1 ? 'company' : 'companies'}
           </span>
@@ -90,6 +84,8 @@ export default function DashboardPage() {
       </Topbar>
 
       <div className="flex-1 overflow-auto p-6">
+        <FilterBar onFilterChange={applyFilters} />
+
         {error ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-sm text-destructive font-medium">
@@ -130,3 +126,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+
