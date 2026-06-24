@@ -1,4 +1,4 @@
-import { getGeminiModel } from '@/lib/gemini'
+import { generateContentWithFallback } from '@/lib/gemini'
 import { EnrichmentResultSchema, type EnrichmentResult } from './schemas'
 
 const MAX_CONTENT_LENGTH = 10000
@@ -47,8 +47,7 @@ ${truncated}
 
 Extract structured enrichment data for this company. Return JSON only.`
 
-  const model = getGeminiModel()
-  const result = await model.generateContent(prompt)
+  const result = await generateContentWithFallback(prompt)
   const text = result.response.text()
 
   try {
