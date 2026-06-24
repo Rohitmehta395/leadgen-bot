@@ -29,9 +29,14 @@ export async function generateContentWithFallback(prompt: string) {
       lastError = error
       const errorMessage = error?.message || String(error)
 
-      // If it's a rate limit or quota error, log it and try the next model
-      if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-        console.warn(`[Gemini] Model ${modelName} hit rate limit or quota, falling back to next model...`)
+      // If it's a rate limit, quota, or 503 high demand error, log it and try the next model
+      if (
+        errorMessage.includes('429') ||
+        errorMessage.includes('503') ||
+        errorMessage.toLowerCase().includes('quota') ||
+        errorMessage.toLowerCase().includes('high demand')
+      ) {
+        console.warn(`[Gemini] Model ${modelName} hit rate limit, quota, or high demand, falling back to next model...`)
         continue
       }
 
