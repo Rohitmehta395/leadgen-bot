@@ -1,3 +1,4 @@
+import { Pool } from 'pg'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 
@@ -6,10 +7,10 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({
-    // Use direct connection for dev; pooler (DATABASE_URL) can be configured for production
-    connectionString: process.env.DIRECT_URL || process.env.DATABASE_URL!,
-  })
+  // Use connection pooler for production (DATABASE_URL), fall back to DIRECT_URL for local dev if needed
+  const connectionString = process.env.DATABASE_URL || process.env.DIRECT_URL!
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter, log: ['error'] })
 }
 
