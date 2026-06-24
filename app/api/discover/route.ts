@@ -12,24 +12,40 @@ const DiscoverInputSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  // Parse body — return 400 for missing or malformed JSON
+  let body: unknown
   try {
-    const body = await request.json()
-    const parsed = DiscoverInputSchema.safeParse(body)
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: 'Invalid request body',
-          details: parsed.error.flatten().fieldErrors,
+    body = await request.json()
+  } catch {
+    return NextResponse.json(
+      {
+        error: 'Request body is missing or not valid JSON',
+        hint: 'Send a JSON body with Content-Type: application/json',
+        example: {
+          industry: 'B2B SaaS',
+          signalTypes: ['hiring', 'funding'],
         },
-        { status: 400 }
-      )
-    }
+      },
+      { status: 400 }
+    )
+  }
 
+  // Validate schema
+  const parsed = DiscoverInputSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: 'Invalid request body',
+        details: parsed.error.flatten().fieldErrors,
+      },
+      { status: 400 }
+    )
+  }
+
+  // Run pipeline
+  try {
     console.log('[POST /api/discover] Starting pipeline with:', parsed.data)
-
     const result = await runDiscoveryPipeline(parsed.data)
-
     return NextResponse.json(result, { status: 200 })
   } catch (error) {
     console.error('[POST /api/discover] Pipeline failed:', error)
